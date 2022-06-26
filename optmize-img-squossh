@@ -1,0 +1,25 @@
+#!/usr/bin/env zx
+
+import fs from 'fs/promises';
+import glob from 'glob';
+import { ImagePool } from '@squoosh/lib';
+import { cpus } from 'os';
+
+const imagePool = new ImagePool(cpus().length);
+
+const encodeOptions = {
+  avif: {},
+  webp: {}
+};
+
+const sensesImgFilePaths = glob.sync('.../images/**', {
+  nodir: true
+});
+
+const image = imagePool.ingestImage(sensesImgFilePaths[3]);
+await image.encode(encodeOptions);
+const webpBinary = await image.encodedWith.avif;
+
+await fs.writeFile(process.cwd() + `/test/01.avif`, webpBinary.binary);
+
+await imagePool.close();
